@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Combustível">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1f2c">
+
+    <title>Calculadora de Combustível App</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-color: #ffffff;
+            --accent-pink: #ff6b81;
+            --accent-purple: #a29bfe;
+            --accent-blue: #74b9ff;
+            --gradient-main: linear-gradient(135deg, #ff6b81, #a29bfe);
+            
+            /* Skins */
+            --skin-1: linear-gradient(to left, #636FA4, #E8CBC0);
+            --skin-2: linear-gradient(to left, #19547b, #ffd89b);
+            --skin-3: linear-gradient(to right, #00b09b, #96c93d);
+            --skin-4: linear-gradient(to right, #8e2de2, #4a00e0);
+            --skin-5: linear-gradient(to right, #f83600, #f9d423);
+            --skin-6: linear-gradient(to right, #00c6ff, #0072ff);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background: var(--skin-1);
+            background-attachment: fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Prevent scrolling on the body */
+            display: flex;
+            flex-direction: column;
+            transition: background 0.5s ease;
+        }
+
+        /* App Wrapper - Full Screen */
+        .app-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px;
+            backdrop-filter: blur(15px) saturate(160%);
+            -webkit-backdrop-filter: blur(15px) saturate(160%);
+        }
+
+        .container {
+            background: var(--glass-bg);
+            padding: 2.5rem 2rem;
+            border-radius: 35px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 10;
+            opacity: 0.8;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.7);
+            padding-left: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 16px; /* Prevents iOS zoom */
+            outline: none;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            border-radius: 20px;
+            border: none;
+            background: var(--gradient-main);
+            color: white;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(255, 107, 129, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-main:active {
+            transform: scale(0.97);
+            filter: brightness(0.9);
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2);
+            margin-top: 20px;
+        }
+
+        /* Results & Spinner */
+        .spinner-box {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 1.5rem auto 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 7px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .circle-progress {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 7px solid transparent;
+            border-top: 7px solid var(--accent-pink);
+            border-right: 7px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .percentage-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        /* Popups */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .popup {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2.5rem 2rem;
+            border-radius: 35px;
+            width: 100%;
+            max-width: 340px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .skin-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 2rem;
+        }
+
+        .skin-item {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .skin-item:active { transform: scale(0.9); }
+
+        .close-popup {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <div class="container">
+        <div class="settings-btn" onclick="togglePopup('skinPopup')">⚙️</div>
+        
+        <h1>⛽ Combustível</h1>
+        
+        <div class="input-group">
+            <label>Modelo do Veículo</label>
+            <input type="text" id="carType" placeholder="Ex: Corolla">
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div class="input-group" style="flex: 1;">
+                <label>KM/L Gasolina</label>
+                <input type="number" id="autGas" inputmode="decimal" placeholder="0.0">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>KM/L Álcool</label>
+                <input type="number" id="autAlc" inputmode="decimal" placeholder="0.0">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div class="input-group" style="flex: 1;">
+                <label>Preço Gasolina</label>
+                <input type="number" id="priceGas" inputmode="decimal" placeholder="0.00">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>Preço Álcool</label>
+                <input type="number" id="priceAlc" inputmode="decimal" placeholder="0.00">
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="calculate()">CALCULAR AGORA</button>
+
+        <div id="loading" style="display: none;">
+            <div class="spinner-box">
+                <div class="circle-bg"></div>
+                <div class="circle-progress"></div>
+            </div>
+        </div>
+
+        <div id="result-container" style="display: none;">
+            <div class="spinner-box">
+                <div class="circle-bg"></div>
+                <div class="circle-progress" style="animation: none; border-color: var(--accent-pink) var(--accent-purple) var(--accent-purple) var(--accent-pink);"></div>
+                <div class="percentage-text" id="percentage">0%</div>
+            </div>
+            <div id="recommendation" style="font-weight: 800; font-size: 1.2rem;"></div>
+            <div id="details" style="font-size: 0.8rem; opacity: 0.7; margin-top: 8px;"></div>
+            
+            <button class="btn-main btn-whatsapp" id="waBtn" onclick="togglePopup('waPopup')">ENVIAR RESULTADO</button>
+        </div>
+    </div>
+</div>
+
+<!-- Popups -->
+<div id="skinPopup" class="overlay" onclick="if(event.target==this)togglePopup('skinPopup')">
+    <div class="popup">
+        <h3 style="margin:0; font-weight: 800;">Personalizar</h3>
+        <div class="skin-options">
+            <div class="skin-item" style="background: var(--skin-1)" onclick="setSkin(1)"></div>
+            <div class="skin-item" style="background: var(--skin-2)" onclick="setSkin(2)"></div>
+            <div class="skin-item" style="background: var(--skin-3)" onclick="setSkin(3)"></div>
+            <div class="skin-item" style="background: var(--skin-4)" onclick="setSkin(4)"></div>
+            <div class="skin-item" style="background: var(--skin-5)" onclick="setSkin(5)"></div>
+            <div class="skin-item" style="background: var(--skin-6)" onclick="setSkin(6)"></div>
+        </div>
+        <div class="close-popup" onclick="togglePopup('skinPopup')">FECHAR</div>
+    </div>
+</div>
+
+<div id="waPopup" class="overlay" onclick="if(event.target==this)togglePopup('waPopup')">
+    <div class="popup">
+        <h3 style="margin:0; font-weight: 800;">WhatsApp</h3>
+        <p style="font-size: 0.8rem; opacity: 0.6; margin: 10px 0 20px;">Envie para um contato</p>
+        <input type="tel" id="waNumber" placeholder="DDD + Número" style="margin-bottom: 15px; text-align: center;">
+        <button class="btn-main" style="background: #25D366;" onclick="sendWhatsApp()">ENVIAR PELO WHATSAPP</button>
+        <div class="close-popup" onclick="togglePopup('waPopup')">CANCELAR</div>
+    </div>
+</div>
+
+<script>
+    let currentResult = "";
+
+    function togglePopup(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function setSkin(index) {
+        const skins = [
+            'var(--skin-1)', 'var(--skin-2)', 'var(--skin-3)', 
+            'var(--skin-4)', 'var(--skin-5)', 'var(--skin-6)'
+        ];
+        document.body.style.background = skins[index-1];
+        togglePopup('skinPopup');
+    }
+
+    function calculate() {
+        const car = document.getElementById('carType').value || "Veículo";
+        const autGas = parseFloat(document.getElementById('autGas').value);
+        const autAlc = parseFloat(document.getElementById('autAlc').value);
+        const priceGas = parseFloat(document.getElementById('priceGas').value);
+        const priceAlc = parseFloat(document.getElementById('priceAlc').value);
+
+        if (!autGas || !autAlc || !priceGas || !priceAlc) {
+            alert("Preencha todos os campos!");
+            return;
+        }
+
+        document.getElementById('result-container').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            
+            const costGas = priceGas / autGas;
+            const costAlc = priceAlc / autAlc;
+            const ratio = (priceAlc / priceGas) * 100;
+
+            document.getElementById('percentage').innerText = Math.round(ratio) + "%";
+            
+            const recEl = document.getElementById('recommendation');
+            const detEl = document.getElementById('details');
+            let fuel = costAlc < costGas ? "ÁLCOOL" : "GASOLINA";
+
+            recEl.innerText = `Abasteça com ${fuel}!`;
+            recEl.style.color = fuel === "ÁLCOOL" ? "var(--accent-pink)" : "var(--accent-blue)";
+            detEl.innerText = `Custo/KM: Gas R$ ${costGas.toFixed(2)} | Alc R$ ${costAlc.toFixed(2)}`;
+            
+            currentResult = `*Calculadora de Combustível*%0A%0A🚗 *Carro:* ${car}%0A⛽ *Veredito:* ${fuel}%0A💰 *Gas:* R$ ${priceGas.toFixed(2)} | *Alc:* R$ ${priceAlc.toFixed(2)}%0A📉 *Relação:* ${Math.round(ratio)}%`;
+
+            document.getElementById('result-container').style.display = 'block';
+        }, 800);
+    }
+
+    function sendWhatsApp() {
+        const num = document.getElementById('waNumber').value.replace(/\D/g, '');
+        if (num.length < 10) {
+            alert("Número inválido!");
+            return;
+        }
+        window.open(`https://api.whatsapp.com/send?phone=55${num}&text=${currentResult}`, '_blank');
+        togglePopup('waPopup');
+    }
+
+    // Prevent scrolling on mobile for app feel
+    document.addEventListener('touchmove', function(e) {
+        if (e.target.tagName !== 'INPUT') {
+            e.preventDefault();
+        }
+    }, { passive: false });
+</script>
+
+</body>
+</html>
